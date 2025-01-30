@@ -1,0 +1,51 @@
+### Google Colab Template for Satellite Data Analysis
+
+# Install necessary libraries (if not already installed)
+!pip install rasterio geopandas xarray matplotlib folium
+
+import os
+import rasterio
+import xarray as xr
+import numpy as np
+import geopandas as gpd
+import matplotlib.pyplot as plt
+from rasterio.plot import show
+from google.colab import drive
+
+# Mount Google Drive (if using data from Drive)
+drive.mount('/content/drive')
+
+# Set the path to your dataset (update with your actual file path)
+data_path = "/content/drive/My Drive/satellite_data/sample.tif"  # Change this to your file
+
+# Load a Cloud-Optimized GeoTIFF (COG)
+with rasterio.open(data_path) as src:
+    image = src.read(1)  # Read the first band
+    profile = src.profile
+
+# Display metadata
+print("Image Metadata:")
+print(profile)
+
+# Plot the image
+plt.figure(figsize=(8,6))
+plt.imshow(image, cmap='gray')
+plt.colorbar(label='Pixel Value')
+plt.title("Satellite Image")
+plt.show()
+
+# Load a NetCDF file (if using multi-dimensional data)
+netcdf_path = "/content/drive/My Drive/satellite_data/sample.nc"  # Change this
+if os.path.exists(netcdf_path):
+    ds = xr.open_dataset(netcdf_path)
+    print(ds)
+
+    # Select a variable (update with actual variable name)
+    variable = list(ds.data_vars.keys())[0]
+    data_array = ds[variable].isel(time=0)  # Select first time step (if applicable)
+    
+    # Plot the data
+    plt.figure(figsize=(8,6))
+    data_array.plot(cmap='viridis')
+    plt.title(f"{variable} from NetCDF")
+    plt.show()
